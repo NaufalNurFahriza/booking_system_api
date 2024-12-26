@@ -1,39 +1,33 @@
--- +migrate Up
--- +migrate StatementBegin
-
-CREATE TABLE users (
+-- Tabel Users
+CREATE TABLE Users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    modified_at TIMESTAMP,
-    modified_by VARCHAR(255)
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE categories (
+-- Tabel Vehicles
+CREATE TABLE Vehicles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    modified_at TIMESTAMP,
-    modified_by VARCHAR(255)
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(50) NOT NULL, -- Contoh: Car, Bike, Scooter
+    license_plate VARCHAR(15) UNIQUE NOT NULL,
+    price_per_day DECIMAL(10, 2) NOT NULL CHECK (price_per_day > 0),
+    available BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE books (
+-- Tabel Bookings
+CREATE TABLE Bookings (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    image_url VARCHAR(255),
-    release_year INTEGER CHECK (release_year BETWEEN 1980 AND 2024),
-    price INTEGER,
-    total_page INTEGER,
-    thickness VARCHAR(50),
-    category_id INTEGER REFERENCES categories(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    modified_at TIMESTAMP,
-    modified_by VARCHAR(255)
+    user_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL CHECK (total_price > 0),
+    FOREIGN KEY (user_id) REFERENCES Users (id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES Vehicles (id) ON DELETE CASCADE
 );
-
--- +migrate StatementEnd
