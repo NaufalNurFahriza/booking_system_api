@@ -9,42 +9,68 @@ import (
 )
 
 func CreateBooking(c *gin.Context) {
+	userID, _ := c.Get("user_id")
 	var booking models.Booking
+
 	if err := c.ShouldBindJSON(&booking); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userID, _ := c.Get("user_id")
 	booking.UserID = userID.(uint)
+	booking.Status = "pending"
 
-	var vehicle models.Vehicle
-	if err := config.DB.First(&vehicle, booking.VehicleID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Vehicle not found"})
-		return
-	}
-
-	if !vehicle.Available {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Vehicle not available"})
-		return
-	}
-
-	days := booking.EndDate.Sub(booking.StartDate).Hours() / 24
-	booking.TotalPrice = vehicle.PricePerDay * float64(days)
-
-	tx := config.DB.Begin()
-	if err := tx.Create(&booking).Error; err != nil {
-		tx.Rollback()
+	if err := config.DB.Create(&booking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
 
-	if err := tx.Model(&vehicle).Update("available", false).Error; err != nil {
-		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update vehicle"})
+	c.JSON(http.StatusCreated, booking)
+}
+
+func GetUserBookings(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	var bookings []models.Booking
+
+	if err := config.DB.Where("user_id = ?", userID).Find(&bookings).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
 		return
 	}
 
-	tx.Commit()
-	c.JSON(http.StatusCreated, booking)
+	c.JSON(http.StatusOK, bookings)
+}
+
+func UpdateBooking(c *gin.Context) {
+	var booking models.Booking
+	if err := config.DB.First(&booking, c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&booking); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := config.DB.Save(&booking).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update booking"})
+		return
+	}
+
+	c.JSON(http.StatusOK, booking)
+}
+
+func CancelBooking(c *gin.Context) {
+	var booking models.Booking
+	if err := config.DB.First(&booking, c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	if err := config.DB.Delete(&booking).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel booking"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Booking canceled successfully"})
 }

@@ -24,6 +24,10 @@ func Register(c *gin.Context) {
 	}
 	user.Password = string(hashedPassword)
 
+	if user.Role == "" {
+		user.Role = "customer"
+	}
+
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
@@ -50,11 +54,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.ID)
+	token, err := middleware.GenerateToken(user.ID, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"token": token, "role": user.Role})
 }

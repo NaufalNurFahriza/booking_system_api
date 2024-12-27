@@ -11,5 +11,7 @@ type Vehicle struct {
 	LicensePlate string    `json:"license_plate" gorm:"unique;not null"`
 	PricePerDay  float64   `json:"price_per_day" gorm:"not null;check:price_per_day > 0"`
 	Available    bool      `json:"available" gorm:"default:true"`
+	Description  string    `json:"description"`
+	ImageURL     string    `json:"image_url"`
 	CreatedAt    time.Time `json:"created_at"`
 }
