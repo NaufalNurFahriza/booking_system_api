@@ -33,5 +33,8 @@ func InitDB() {
 	}
 
 	// Auto Migrate
-	DB.AutoMigrate(&models.User{}, &models.Vehicle{}, &models.Booking{})
+	err = DB.AutoMigrate(&models.User{}, &models.Vehicle{}, &models.Booking{}, &models.Payment{})
+	if err != nil {
+		log.Fatalf("Error during migration: %v", err)
+	}
 }
