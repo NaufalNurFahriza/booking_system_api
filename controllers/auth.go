@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"booking_api/database"
+	"booking_api/config"
 	"booking_api/middleware"
 	"booking_api/models"
 	"net/http"
@@ -28,7 +28,7 @@ func Register(c *gin.Context) {
 		user.Role = "customer"
 	}
 
-	if err := database.DB.Create(&user).Error; err != nil {
+	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -44,7 +44,7 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := database.DB.Where("email = ?", loginReq.Email).First(&user).Error; err != nil {
+	if err := config.DB.Where("email = ?", loginReq.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
