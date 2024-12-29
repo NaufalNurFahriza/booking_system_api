@@ -11,10 +11,11 @@ type User struct {
 	Password  string    `json:"password,omitempty" gorm:"not null"`
 	Role      string    `json:"role" gorm:"not null;default:customer"`
 	Phone     string    `json:"phone"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required,username"`
 	Password string `json:"password" binding:"required"`
 }
