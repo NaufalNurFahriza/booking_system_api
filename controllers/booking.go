@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"booking_api/config"
+	"booking_api/database"
 	"booking_api/models"
 	"net/http"
 
@@ -20,7 +20,7 @@ func CreateBooking(c *gin.Context) {
 	booking.UserID = userID.(uint)
 	booking.Status = "pending"
 
-	if err := config.DB.Create(&booking).Error; err != nil {
+	if err := database.DB.Create(&booking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
@@ -32,7 +32,7 @@ func GetUserBookings(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	var bookings []models.Booking
 
-	if err := config.DB.Where("user_id = ?", userID).Find(&bookings).Error; err != nil {
+	if err := database.DB.Where("user_id = ?", userID).Find(&bookings).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
 		return
 	}
@@ -42,7 +42,7 @@ func GetUserBookings(c *gin.Context) {
 
 func UpdateBooking(c *gin.Context) {
 	var booking models.Booking
-	if err := config.DB.First(&booking, c.Param("id")).Error; err != nil {
+	if err := database.DB.First(&booking, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
 	}
@@ -52,7 +52,7 @@ func UpdateBooking(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Save(&booking).Error; err != nil {
+	if err := database.DB.Save(&booking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update booking"})
 		return
 	}
@@ -62,12 +62,12 @@ func UpdateBooking(c *gin.Context) {
 
 func CancelBooking(c *gin.Context) {
 	var booking models.Booking
-	if err := config.DB.First(&booking, c.Param("id")).Error; err != nil {
+	if err := database.DB.First(&booking, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
 	}
 
-	if err := config.DB.Delete(&booking).Error; err != nil {
+	if err := database.DB.Delete(&booking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel booking"})
 		return
 	}

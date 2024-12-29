@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"booking_api/config"
+	"booking_api/database"
 	"booking_api/models"
 	"net/http"
 	"time"
@@ -18,7 +18,7 @@ func CreatePayment(c *gin.Context) {
 
 	// Get booking to verify ownership and status
 	var booking models.Booking
-	if err := config.DB.First(&booking, payment.BookingID).Error; err != nil {
+	if err := database.DB.First(&booking, payment.BookingID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
 	}
@@ -32,7 +32,7 @@ func CreatePayment(c *gin.Context) {
 
 	payment.PaymentDate = time.Now()
 
-	tx := config.DB.Begin()
+	tx := database.DB.Begin()
 	if err := tx.Create(&payment).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create payment"})
@@ -59,7 +59,7 @@ func GetBookingPayments(c *gin.Context) {
 
 	// Verify booking ownership
 	var booking models.Booking
-	if err := config.DB.First(&booking, bookingID).Error; err != nil {
+	if err := database.DB.First(&booking, bookingID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
 	}
@@ -70,7 +70,7 @@ func GetBookingPayments(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Where("booking_id = ?", bookingID).Find(&payments).Error; err != nil {
+	if err := database.DB.Where("booking_id = ?", bookingID).Find(&payments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch payments"})
 		return
 	}
@@ -85,7 +85,7 @@ func UpdatePayment(c *gin.Context) {
 	}
 
 	var payment models.Payment
-	if err := config.DB.First(&payment, c.Param("id")).Error; err != nil {
+	if err := database.DB.First(&payment, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
 		return
 	}
@@ -95,7 +95,7 @@ func UpdatePayment(c *gin.Context) {
 		return
 	}
 
-	tx := config.DB.Begin()
+	tx := database.DB.Begin()
 	if err := tx.Save(&payment).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update payment"})
@@ -126,7 +126,7 @@ func UpdatePayment(c *gin.Context) {
 func GetAllPayments(c *gin.Context) {
 	var payments []models.Payment
 
-	if err := config.DB.Find(&payments).Error; err != nil {
+	if err := database.DB.Find(&payments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch payments"})
 		return
 	}

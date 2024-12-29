@@ -1,14 +1,14 @@
 package main
 
 import (
-	"booking_api/config"
+	"booking_api/database"
 	"booking_api/routes"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	config.InitDB()
+	database.InitDB()
 
 	r := gin.Default()
 	routes.SetupRoutes(r)

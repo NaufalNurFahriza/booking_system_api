@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"booking_api/config"
+	"booking_api/database"
 	"booking_api/models"
 	"net/http"
 
@@ -20,7 +20,7 @@ func CreateVehicle(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Create(&vehicle).Error; err != nil {
+	if err := database.DB.Create(&vehicle).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create vehicle"})
 		return
 	}
@@ -35,7 +35,7 @@ func UpdateVehicle(c *gin.Context) {
 	}
 
 	var vehicle models.Vehicle
-	if err := config.DB.First(&vehicle, c.Param("id")).Error; err != nil {
+	if err := database.DB.First(&vehicle, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Vehicle not found"})
 		return
 	}
@@ -45,7 +45,7 @@ func UpdateVehicle(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Save(&vehicle).Error; err != nil {
+	if err := database.DB.Save(&vehicle).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update vehicle"})
 		return
 	}
@@ -57,7 +57,7 @@ func GetVehicles(c *gin.Context) {
 	var vehicles []models.Vehicle
 
 	// Fetch all vehicles from the database
-	if err := config.DB.Find(&vehicles).Error; err != nil {
+	if err := database.DB.Find(&vehicles).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch vehicles"})
 		return
 	}
@@ -73,12 +73,12 @@ func DeleteVehicle(c *gin.Context) {
 	}
 
 	var vehicle models.Vehicle
-	if err := config.DB.First(&vehicle, c.Param("id")).Error; err != nil {
+	if err := database.DB.First(&vehicle, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Vehicle not found"})
 		return
 	}
 
-	if err := config.DB.Delete(&vehicle).Error; err != nil {
+	if err := database.DB.Delete(&vehicle).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete vehicle"})
 		return
 	}
