@@ -21,7 +21,7 @@ A RESTful API for a movie booking system built with Go, Gin, and PostgreSQL.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/booking-api.git
+git clone https://github.com/NaufalNurFahriza/booking_system_api.git
 ```
 
 2. Install dependencies:
