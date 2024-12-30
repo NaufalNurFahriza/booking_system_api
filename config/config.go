@@ -13,31 +13,57 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() *gorm.DB { // Mengembalikan *gorm.DB
-	err := godotenv.Load(".env")
+func InitDB() *gorm.DB {
+	// Load .env file dari root project
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Printf("Warning: Error loading .env file: %v", err)
 	}
-	// dsn := os.Getenv("DATABASE_URL")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		os.Getenv("PGHOST"),
-		os.Getenv("PGUSER"),
-		os.Getenv("PGPASSWORD"),
-		os.Getenv("PGDATABASE"),
-		os.Getenv("PGPORT"),
-	)
+	// Gunakan DATABASE_URL yang sudah disediakan Railway
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		// Jika DATABASE_URL kosong, gunakan individual credentials
+		dsn = fmt.Sprintf(
+			"postgresql://%s:%s@%s:%s/%s?sslmode=require",
+			os.Getenv("PGUSER"),
+			os.Getenv("PGPASSWORD"),
+			os.Getenv("PGHOST"),
+			os.Getenv("PGPORT"),
+			os.Getenv("PGDATABASE"),
+		)
+	}
 
+	// Tampilkan DSN untuk debug (hapus password sebelum logging)
+	log.Printf("Connecting to database...")
+
+	// Buka koneksi dengan PostgreSQL
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database")
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// Verifikasi koneksi
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Fatalf("Failed to get database instance: %v", err)
+	}
+
+	// Test koneksi
+	err = sqlDB.Ping()
+	if err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+
+	log.Printf("Database connected successfully")
+
 	// Auto Migrate
+	log.Printf("Running migrations...")
 	err = DB.AutoMigrate(&models.User{}, &models.Movie{}, &models.Booking{}, &models.Schedule{})
 	if err != nil {
 		log.Fatalf("Error during migration: %v", err)
 	}
+	log.Printf("Migrations completed successfully")
 
-	return DB // Mengembalikan objek DB
+	return DB
 }
