@@ -5,41 +5,54 @@ import (
 	"booking_api/middleware"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes(r *gin.Engine) {
+func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	api := r.Group("/api")
 
-	// Public routes
+	//Auth routes
 	api.POST("/register", controllers.Register)
 	api.POST("/login", controllers.Login)
-	api.GET("/vehicles", controllers.GetVehicles)
+
+	// Public routes
+	api.GET("/movies", controllers.GetAllMovies)
+	api.GET("/schedules", controllers.GetAllSchedules)
 
 	// Protected routes
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		// Customer profile management
+		api.PUT("/profile", controllers.UpdateCustomer)
+		api.DELETE("/profile", controllers.DeleteCustomer)
+
+		// Booking routes for all authenticated users
+		api.POST("/bookings", controllers.CreateBooking)
+		api.GET("/bookings/my", controllers.GetMyBookings)
+		api.PUT("/bookings/:id", controllers.UpdateBooking)
+		api.DELETE("/bookings/:id", controllers.DeleteBooking)
+
 		// Admin routes
 		admin := protected.Group("/")
 		admin.Use(middleware.AdminOnly())
 		{
-			admin.POST("/vehicles", controllers.CreateVehicle)
-			admin.PUT("/vehicles/:id", controllers.UpdateVehicle)
-			admin.DELETE("/vehicles/:id", controllers.DeleteVehicle)
+			// Customer management
+			admin.GET("/customers", controllers.GetAllCustomers)
 
-			// Admin payment routes
-			admin.PUT("/payments/:id", controllers.UpdatePayment)
-			admin.GET("/payments", controllers.GetAllPayments)
+			// Movie management
+			admin.POST("/movies", controllers.CreateMovie)
+			admin.PUT("/movies/:id", controllers.UpdateMovie)
+			admin.DELETE("/movies/:id", controllers.DeleteMovie)
+
+			// Schedule management
+			admin.POST("/schedules", controllers.CreateSchedule)
+			admin.PUT("/schedules/:id", controllers.UpdateSchedule)
+			admin.DELETE("/schedules/:id", controllers.DeleteSchedule)
+
+			// Booking management
+			admin.GET("/bookings", controllers.GetAllBookings)
 		}
 
-		// Customer routes
-		protected.POST("/bookings", controllers.CreateBooking)
-		protected.GET("/bookings", controllers.GetUserBookings)
-		protected.PUT("/bookings/:id", controllers.UpdateBooking)
-		protected.DELETE("/bookings/:id", controllers.CancelBooking)
-
-		// Payment routes
-		protected.POST("/bookings/:id/payments", controllers.CreatePayment)
-		protected.GET("/bookings/:id/payments", controllers.GetBookingPayments)
 	}
 }
