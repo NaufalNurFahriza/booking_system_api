@@ -2,7 +2,6 @@ package config
 
 import (
 	"booking_api/models"
-	"fmt"
 	"log"
 	"os"
 
@@ -18,14 +17,15 @@ func InitDB() *gorm.DB { // Mengembalikan *gorm.DB
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	dsn := os.Getenv("DATABASE_URL")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		os.Getenv("PGHOST"),
-		os.Getenv("PGUSER"),
-		os.Getenv("PGPASSWORD"),
-		os.Getenv("PGDATABASE"),
-		os.Getenv("PGPORT"),
-	)
+	// dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+	// 	os.Getenv("PGHOST"),
+	// 	os.Getenv("PGUSER"),
+	// 	os.Getenv("PGPASSWORD"),
+	// 	os.Getenv("PGDATABASE"),
+	// 	os.Getenv("PGPORT"),
+	// )
 
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
