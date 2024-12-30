@@ -21,9 +21,22 @@ func CreateSchedule(c *gin.Context) {
 		return
 	}
 
+	// Verify that the movie exists
+	var movie models.Movie
+	if err := config.DB.First(&movie, schedule.MovieID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Movie not found"})
+		return
+	}
+
 	// Save the new schedule to the database
 	if err := config.DB.Create(&schedule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create schedule"})
+		return
+	}
+
+	// Fetch the complete schedule with movie data
+	if err := config.DB.Preload("Movie").First(&schedule, schedule.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch complete schedule data"})
 		return
 	}
 
@@ -43,14 +56,21 @@ func UpdateSchedule(c *gin.Context) {
 		return
 	}
 
+	// Bind input data ke jadwal yang sudah ada
 	if err := c.ShouldBindJSON(&schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Save the updated schedule to the database
+	// Perbarui jadwal di database
 	if err := config.DB.Save(&schedule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update schedule"})
+		return
+	}
+
+	// Fetch data lengkap termasuk relasi Movie
+	if err := config.DB.Preload("Movie").First(&schedule, schedule.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated schedule data"})
 		return
 	}
 

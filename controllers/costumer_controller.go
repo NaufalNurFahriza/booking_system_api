@@ -9,29 +9,33 @@ import (
 )
 
 func UpdateCustomer(c *gin.Context) {
-	// Ensure only the customer themselves or an admin can update.
-	userID := c.GetUint("user_id") // Get user_id from middleware.
+	// Ambil ID dari parameter URL.
+	paramID := c.Param("id")
+
+	// Ambil user_id dari token.
+	authenticatedUserID := c.GetUint("user_id")
 	role, _ := c.Get("role")
 
+	// Cari user berdasarkan ID dari parameter.
 	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
+	if err := config.DB.First(&user, paramID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	// Allow admin or the user themselves to update.
-	if role != "admin" && user.ID != userID {
+	// Pastikan hanya admin atau user itu sendiri yang dapat mengedit data.
+	if role != "admin" && user.ID != authenticatedUserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized access"})
 		return
 	}
 
-	// Bind the JSON body to the user model.
+	// Perbarui data user dengan data dari request body.
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Save the updated user.
+	// Simpan perubahan ke database.
 	if err := config.DB.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
 		return

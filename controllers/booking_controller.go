@@ -9,45 +9,59 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateBooking creates a new booking
 func CreateBooking(c *gin.Context) {
-	userID, _ := c.Get("user_id")
-	var booking models.Booking
+	// Safely extract userID
+	userIDInterface, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
 
+	// Convert userID to float64 first (as JWT typically stores numbers as float64)
+	userIDFloat, ok := userIDInterface.(float64)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	// Convert float64 to uint
+	userID := uint(userIDFloat)
+
+	var booking models.Booking
 	if err := c.ShouldBindJSON(&booking); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Assign user ID from the authenticated user
-	booking.UserID = userID.(uint)
+	// Verify that the schedule exists and preload its movie data
+	var schedule models.Schedule
+	if err := config.DB.Preload("Movie").First(&schedule, booking.ScheduleID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Schedule not found"})
+		return
+	}
+
+	// Set booking details
+	booking.UserID = userID
 	booking.BookingDate = time.Now()
 	booking.PaymentStatus = "unpaid"
 
-	// Save booking to the database
+	// Create the booking
 	if err := config.DB.Create(&booking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Booking created successfully",
-		"booking": booking,
-	})
-}
-
-// GetMyBookings retrieves bookings for the authenticated user
-func GetMyBookings(c *gin.Context) {
-	userID, _ := c.Get("user_id")
-	var bookings []models.Booking
-
-	// Fetch bookings for the logged-in user
-	if err := config.DB.Preload("Schedule").Where("user_id = ?", userID).Find(&bookings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
+	// Fetch the complete booking with all relationships
+	var completeBooking models.Booking
+	if err := config.DB.Preload("User").Preload("Schedule").Preload("Schedule.Movie").First(&completeBooking, booking.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch complete booking data"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"bookings": bookings})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Booking created successfully",
+		"booking": completeBooking,
+	})
 }
 
 // UpdateBooking updates a specific booking

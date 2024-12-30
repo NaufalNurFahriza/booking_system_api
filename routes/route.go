@@ -24,12 +24,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		// Customer profile management
-		api.PUT("/profile", controllers.UpdateCustomer)
-		api.DELETE("/profile", controllers.DeleteCustomer)
+		api.PUT("/customers/:id", controllers.UpdateCustomer)
+		api.DELETE("/customers/:id", controllers.DeleteCustomer)
 
 		// Booking routes for all authenticated users
 		api.POST("/bookings", controllers.CreateBooking)
-		api.GET("/bookings/my", controllers.GetMyBookings)
 		api.PUT("/bookings/:id", controllers.UpdateBooking)
 		api.DELETE("/bookings/:id", controllers.DeleteBooking)
 

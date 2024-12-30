@@ -8,7 +8,6 @@ import (
 
 type BookingRepository interface {
 	CreateBooking(booking *models.Booking) (*models.Booking, error)
-	GetMyBookings(userID uint) ([]models.Booking, error)
 	GetAllBookings() ([]models.Booking, error)
 	UpdateBooking(booking *models.Booking) (*models.Booking, error)
 	DeleteBooking(id uint) error
@@ -28,15 +27,6 @@ func (r *bookingRepository) CreateBooking(booking *models.Booking) (*models.Book
 		return nil, err
 	}
 	return booking, nil
-}
-
-// GetMyBookings retrieves all bookings for a specific user
-func (r *bookingRepository) GetMyBookings(userID uint) ([]models.Booking, error) {
-	var bookings []models.Booking
-	if err := r.db.Preload("Schedule").Where("user_id = ?", userID).Find(&bookings).Error; err != nil {
-		return nil, err
-	}
-	return bookings, nil
 }
 
 // GetAllBookings retrieves all bookings (admin access only)

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -55,6 +56,11 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		// Debugging log
+		userID := claims["user_id"].(float64)
+		role := claims["role"].(string)
+		fmt.Printf("Authenticated user_id: %v, role: %s\n", userID, role)
 
 		c.Set("user_id", uint(claims["user_id"].(float64)))
 		c.Set("role", claims["role"].(string))
