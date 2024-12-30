@@ -5,11 +5,12 @@ A RESTful API for a movie booking system built with Go, Gin, and PostgreSQL.
 ## Features
 
 - User authentication with JWT
-- Movie management
-- Cinema and screen management
-- Schedule management
-- Booking system with seat availability checking
-- Admin panel for content management
+- GIN and GORM framework implementation
+- Register and login
+- Movie CRUD management
+- Schedule CRUD Management
+- Booking CRUD Management (still under construction)
+- edit and delete customer data (still under construction)
 
 ## Prerequisites
 
@@ -51,35 +52,31 @@ go run main.go
 - `POST /api/register` - Register new customer
 - `POST /api/login` - Login customer
 
-### Public Endpoints
-- `GET /api/movies` - List all movies
-- `GET /api/movies/:id` - Get movie details
-- `GET /api/cinemas` - List all cinemas
-- `GET /api/cinemas/:id` - Get cinema details
-- `GET /api/schedules` - List all schedules
-- `GET /api/schedules/:id` - Get schedule details
+### Customer Profile management (still under construction)
+- `PUT /api/customers/:id` - Update profile costumer
+- `DELETE /api/customers/:id` - Delete profile costumer
 
-### Protected Endpoints (requires authentication)
+### Booking routes (still under construction)
 - `POST /api/bookings` - Create new booking
-- `GET /api/bookings` - List customer's bookings
-- `GET /api/bookings/:id` - Get booking details
-- `PUT /api/bookings/:id/cancel` - Cancel booking
+- `PUT /api/bookings` - update booking
+- `DELETE /api/bookings/:id` - Delete booking
 
-### Admin Endpoints (requires authentication)
-- `POST /api/admin/movies` - Create movie
-- `PUT /api/admin/movies/:id` - Update movie
-- `DELETE /api/admin/movies/:id` - Delete movie
-- `POST /api/admin/cinemas` - Create cinema
-- `PUT /api/admin/cinemas/:id` - Update cinema
-- `DELETE /api/admin/cinemas/:id` - Delete cinema
-- `POST /api/admin/screens` - Create screen
-- `GET /api/admin/screens` - List all screens
-- `GET /api/admin/screens/:id` - Get screen details
-- `PUT /api/admin/screens/:id` - Update screen
-- `DELETE /api/admin/screens/:id` - Delete screen
-- `POST /api/admin/schedules` - Create schedule
-- `PUT /api/admin/schedules/:id` - Update schedule
-- `DELETE /api/admin/schedules/:id` - Delete schedule
+### admin routes (requires authentication)
+### get all data Customer 
+- `GET /api/customers/` - List customer's bookings
+
+### Movie management
+- `POST /api/movies` - Create movie
+- `PUT /api/movies/:id` - Update movie
+- `DELETE /api/movies/:id` - Delete movie
+
+### Schedule management
+- `POST /api/schedules` - Create schedule
+- `PUT /api/schedules/:id` - Update schedule
+- `DELETE /api/schedules/:id` - Delete schedule
+
+### Booking management
+- `GET /api/bookings` - Create new booking
 
 ## Deployment
 
