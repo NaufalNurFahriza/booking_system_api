@@ -6,44 +6,50 @@ import (
 	"gorm.io/gorm"
 )
 
-type PaymentRepository interface {
-	CreatePayment(payment *models.Payment) (*models.Payment, error)
-	GetPaymentByID(id uint) (*models.Payment, error)
-	GetPaymentsByBookingID(bookingID uint) ([]models.Payment, error)
-	UpdatePayment(payment *models.Payment) error
+type ScheduleRepository interface {
+	CreateSchedule(schedule *models.Schedule) (*models.Schedule, error)
+	UpdateSchedule(schedule *models.Schedule) (*models.Schedule, error)
+	GetAllSchedules() ([]models.Schedule, error)
+	DeleteSchedule(id uint) error
 }
 
-type paymentRepository struct {
+type scheduleRepository struct {
 	db *gorm.DB
 }
 
-func NewPaymentRepository(db *gorm.DB) PaymentRepository {
-	return &paymentRepository{db: db}
+func NewScheduleRepository(db *gorm.DB) ScheduleRepository {
+	return &scheduleRepository{db: db}
 }
 
-func (r *paymentRepository) CreatePayment(payment *models.Payment) (*models.Payment, error) {
-	if err := r.db.Create(payment).Error; err != nil {
+// CreateSchedule creates a new schedule record in the database
+func (r *scheduleRepository) CreateSchedule(schedule *models.Schedule) (*models.Schedule, error) {
+	if err := r.db.Create(schedule).Error; err != nil {
 		return nil, err
 	}
-	return payment, nil
+	return schedule, nil
 }
 
-func (r *paymentRepository) GetPaymentByID(id uint) (*models.Payment, error) {
-	var payment models.Payment
-	if err := r.db.First(&payment, id).Error; err != nil {
+// UpdateSchedule updates an existing schedule record
+func (r *scheduleRepository) UpdateSchedule(schedule *models.Schedule) (*models.Schedule, error) {
+	if err := r.db.Save(schedule).Error; err != nil {
 		return nil, err
 	}
-	return &payment, nil
+	return schedule, nil
 }
 
-func (r *paymentRepository) GetPaymentsByBookingID(bookingID uint) ([]models.Payment, error) {
-	var payments []models.Payment
-	if err := r.db.Where("booking_id = ?", bookingID).Find(&payments).Error; err != nil {
+// GetAllSchedules retrieves all schedules from the database
+func (r *scheduleRepository) GetAllSchedules() ([]models.Schedule, error) {
+	var schedules []models.Schedule
+	if err := r.db.Preload("Movie").Find(&schedules).Error; err != nil {
 		return nil, err
 	}
-	return payments, nil
+	return schedules, nil
 }
 
-func (r *paymentRepository) UpdatePayment(payment *models.Payment) error {
-	return r.db.Save(payment).Error
+// DeleteSchedule deletes a schedule by its ID
+func (r *scheduleRepository) DeleteSchedule(id uint) error {
+	if err := r.db.Delete(&models.Schedule{}, id).Error; err != nil {
+		return err
+	}
+	return nil
 }
