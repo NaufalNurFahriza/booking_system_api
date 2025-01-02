@@ -15,10 +15,13 @@ var DB *gorm.DB
 
 func InitDB() *gorm.DB {
 	// Load .env file dari root project
-	err := godotenv.Load()
+	err := godotenv.Load("config/.env")
 	if err != nil {
 		log.Printf("Warning: Error loading .env file: %v", err)
 	}
+
+	// Cek apakah DATABASE_URL ada dan log isinya
+	log.Printf("DATABASE_URL: %s", os.Getenv("DATABASE_URL"))
 
 	// Gunakan DATABASE_URL yang sudah disediakan Railway
 	dsn := os.Getenv("DATABASE_URL")
