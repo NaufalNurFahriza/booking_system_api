@@ -3,6 +3,8 @@ package main
 import (
 	"booking_api/config"
 	"booking_api/routes"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +19,13 @@ func main() {
 	// Setup routes with the database connection
 	routes.SetupRoutes(r, db)
 
-	// Run the server on port 8080
-	r.Run(":8080")
+	// Get port from environment variable, default to "8080" if not set
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	// Log and run the server on the specified port
+	log.Printf("Server is running on port %s", port)
+	r.Run(":" + port)
 }
