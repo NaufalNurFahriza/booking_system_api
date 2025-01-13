@@ -2,6 +2,8 @@
 
 A RESTful API for a movie booking system built with Go, Gin, and PostgreSQL.
 
+https://bookingsystemapi-production.up.railway.app
+
 ## Features
 
 - User authentication with JWT
